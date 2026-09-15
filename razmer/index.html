@@ -84,45 +84,6 @@
   .sec-head { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
   .sec-head p { color: var(--muted); max-width: 62ch; }
 
-  /* --- Все варианты рядом --- */
-  .strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
-  .opt {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 6px;
-    background: none;
-    border: 0;
-    text-align: center;
-  }
-  .opt canvas {
-    display: block;
-    width: 100%;
-    aspect-ratio: 390 / 844;
-    border-radius: 16px;
-    background: #4a2a7a;
-    box-shadow: 0 0 0 3px #0f0920;
-    transition: box-shadow 0.15s ease;
-  }
-  .opt:hover canvas { box-shadow: 0 0 0 3px var(--muted); }
-  .opt.picked canvas { box-shadow: 0 0 0 4px var(--yellow); }
-  .opt .name { font-weight: 700; font-size: 15px; line-height: 1.25; }
-  .opt .mult { font-size: 13px; color: var(--muted); }
-  .tags { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px; min-height: 22px; }
-  .tag {
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 1;
-    padding: 5px 8px;
-    border-radius: 99px;
-    background: var(--yellow);
-    color: var(--purple);
-  }
-  @media (max-width: 720px) {
-    .strip { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; margin-inline: -20px; padding-inline: 20px; }
-    .opt { flex: 0 0 132px; scroll-snap-align: start; }
-  }
-
   /* --- Выбор: живой экран и переключатели --- */
   .chooser { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 44px; align-items: start; }
   .phone {
@@ -144,8 +105,11 @@
     font-size: 17px;
     text-transform: uppercase;
   }
-  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
-  .chip { position: relative; display: inline-flex; }
+  /* пять вариантов — одним рядом равной ширины; на узком телефоне 3 + 2 */
+  .chips { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 540px) { .chips { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .chip { position: relative; display: flex; }
+  .chip > span { flex: 1; }
   .chip input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
   .chip span {
     display: flex;
@@ -198,7 +162,7 @@
     .phone-box { justify-self: center; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .opt canvas, .chip span, .btn-copy { transition: none; }
+    .chip span, .btn-copy { transition: none; }
   }
 </style>
 </head>
@@ -210,18 +174,10 @@
     <p class="lede">Выберите, насколько крупными будут десерты и голова Бека, пока они падают. Коробка остаётся прежнего размера, а пойманные десерты лежат в ней маленькими.</p>
   </header>
 
-  <section aria-labelledby="strip-title">
-    <div class="sec-head">
-      <h2 id="strip-title">Все варианты рядом</h2>
-      <p>От того, как сейчас, до вдвое крупнее. Нажмите на вариант — он выберется и для десертов, и для Бека.</p>
-    </div>
-    <div class="strip" id="strip"></div>
-  </section>
-
   <section aria-labelledby="choose-title">
     <div class="sec-head">
       <h2 id="choose-title">Как это выглядит в игре</h2>
-      <p>Десерты и Бека можно выбрать отдельно — картинка на экране сразу меняется.</p>
+      <p>Выберите размер отдельно для десертов и для Бека — от того, как сейчас, до вдвое крупнее. Картинка на экране сразу меняется.</p>
     </div>
     <div class="chooser">
       <div class="phone-box">
@@ -357,7 +313,7 @@
     hud(c, w);
   }
 
-  // Неподвижная расстановка для сравнения вариантов
+  // Неподвижная расстановка — если в системе выключена анимация
   const STILL = [
     { kind: 'dessert', img: 'strawberry', x: 0.3, y: 0.3 },
     { kind: 'bek', x: 0.68, y: 0.47 },
@@ -389,21 +345,6 @@
     return out;
   }
 
-  // --- Сравнение: пять экранов ---------------------------------------------------
-  const strip = document.getElementById('strip');
-  const opts = SIZES.map((z) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'opt';
-    b.setAttribute('aria-label', 'Выбрать для десертов и Бека: ' + z.name + ' (' + z.mult + ')');
-    b.innerHTML = '<canvas aria-hidden="true"></canvas><span class="name">' + z.name + '</span>' +
-      '<span class="mult">' + z.mult + '</span><span class="tags"></span>';
-    b.addEventListener('click', () => { pick.dessert = pick.bek = z.id; update(); });
-    strip.appendChild(b);
-    return { z, el: b, cv: b.querySelector('canvas'), tags: b.querySelector('.tags') };
-  });
-  const drawStrip = () => opts.forEach((o) => scene(o.cv, o.z.size, o.z.size, STILL, 0.5));
-
   // --- Переключатели -------------------------------------------------------------
   function chips(group) {
     const box = document.getElementById('chips-' + group);
@@ -419,11 +360,6 @@
   function update() {
     save();
     for (const g of ['dessert', 'bek']) document.getElementById(g + '-' + pick[g]).checked = true;
-    opts.forEach((o) => {
-      const d = pick.dessert === o.z.id, b = pick.bek === o.z.id;
-      o.el.classList.toggle('picked', d || b);
-      o.tags.innerHTML = (d ? '<span class="tag">десерты</span>' : '') + (b ? '<span class="tag">Бек</span>' : '');
-    });
     const dz = byId(pick.dessert), bz = byId(pick.bek);
     summary.textContent = 'Десерты — ' + dz.name.toLowerCase() + ' (' + dz.mult + '); Бек — ' + bz.name.toLowerCase() + ' (' + bz.mult + ').';
     if (reduced) drawLive(1.2);
@@ -462,10 +398,10 @@
 
   loadImages().then(() => {
     update();
-    drawStrip();
-    if (reduced) drawLive(1.2); else requestAnimationFrame(loop);
-    window.addEventListener('resize', drawStrip);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawStrip);
+    if (!reduced) { requestAnimationFrame(loop); return; }
+    // без анимации кадр перерисовываем только при смене размера окна и загрузке шрифта
+    window.addEventListener('resize', () => drawLive(1.2));
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => drawLive(1.2));
   });
 })();
 </script>
