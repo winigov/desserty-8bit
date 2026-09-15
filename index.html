@@ -59,12 +59,6 @@
   /* Pixelify — только для главного заголовка: в строчной кириллице у него «д» похожа на «а» */
   h1, h2, h3 { font-family: var(--body); text-wrap: balance; margin: 0; }
   p { margin: 0; }
-  code {
-    font-family: var(--mono);
-    font-size: 0.88em;
-    background: rgba(185, 164, 240, 0.14);
-    padding: 1px 6px;
-  }
   button { font: inherit; cursor: pointer; }
   :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
@@ -136,16 +130,7 @@
   .btn-big:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--gold-deep); }
 
   .tl-scroll { overflow-x: auto; padding-block: 8px; }
-  .tl { display: grid; grid-template-columns: 76px minmax(0, 1fr); min-width: 760px; row-gap: 6px; }
-  .lanes { display: grid; grid-template-rows: 1fr 1fr; height: 104px; }
-  .lanes span {
-    align-self: center;
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--cloud);
-  }
+  .tl { display: flex; flex-direction: column; gap: 6px; min-width: 700px; }
   .track {
     position: relative;
     height: 104px;
@@ -195,15 +180,9 @@
   }
   .now { font-family: var(--mono); font-size: 13px; color: var(--ink); min-height: 1.5em; }
 
-  /* --- Списки звуков --- */
+  /* --- Список звуков --- */
   .sec-head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
   .sec-head p { color: var(--muted); max-width: 65ch; }
-  .legend { font-family: var(--mono); font-size: 12px; color: var(--cloud); display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .sw { display: inline-block; width: 10px; height: 10px; }
-  .sw.sq { background: var(--gold); }
-  .sw.tri { background: var(--sunset); }
-  .sw.noise { background: var(--cloud); }
 
   .snd {
     display: grid;
@@ -245,9 +224,10 @@
     transition: border-color 0.12s ease, background 0.12s ease;
   }
   .chip span:hover, .btn-pair:hover { border-color: var(--cloud); }
-  .chip input:checked + span { background: var(--gold); border-color: var(--gold); color: var(--night); }
+  .chip-none span { border-style: dashed; color: var(--muted); font-weight: 400; }
+  .chip input:checked + span { background: var(--gold); border-color: var(--gold); border-style: solid; color: var(--night); font-weight: 700; }
   .chip input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 2px; }
-  .btn-pair { border-style: dashed; color: var(--muted); }
+  .btn-pair { border-color: transparent; color: var(--cloud); font-weight: 400; text-decoration: underline; text-underline-offset: 3px; }
 
   .roll { display: flex; flex-direction: column; gap: 4px; min-width: 0; transition: opacity 0.15s ease; }
   .roll canvas { display: block; width: 100%; height: 72px; background: var(--well); }
@@ -267,6 +247,7 @@
   }
   .btn-play svg { width: 18px; height: 18px; margin-left: 3px; }
   .btn-play:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--gold-deep); }
+  .btn-play:disabled { opacity: 0.35; cursor: default; transform: none; }
 
   @media (max-width: 680px) {
     .snd { grid-template-columns: 48px minmax(0, 1fr) 52px; }
@@ -300,7 +281,6 @@
     padding: 9px 20px;
   }
   #copy-note { font-family: var(--mono); font-size: 13px; color: var(--cloud); }
-  footer { font-size: 14px; color: var(--cloud); max-width: 65ch; }
 
   @media (prefers-reduced-motion: reduce) {
     .mk, .btn-big, .btn-play, .roll { transition: none; }
@@ -312,13 +292,13 @@
 
 <main class="wrap">
   <header class="head">
-    <p class="eyebrow">Лови десерты с Беком · звуки без музыки</p>
+    <p class="eyebrow">Лови десерты с Беком · звуки</p>
     <h1>Десерты <span>в&nbsp;8&nbsp;бит</span></h1>
-    <p class="lede">Десять коротких звуков в стиле старых приставок — под пиксельную графику игры. Без музыки, без голоса и фраз. Для четырёх главных событий есть по два варианта; по умолчанию выбраны те, что советую я.</p>
+    <p class="lede">Звуки для игры в стиле старых приставок — под её пиксельную картинку. Без музыки и без голоса. Для каждого момента игры есть три варианта: послушайте и выберите тот, что нравится больше. Сразу выбраны варианты, которые советую я.</p>
     <div class="controls">
       <label for="volume">Громкость</label>
       <input type="range" id="volume" min="0" max="100" value="60">
-      <p class="hint">Не слышно на iPhone? Выключите беззвучный режим — он глушит звук в браузере.</p>
+      <p class="hint">Не слышно на iPhone? Выключите беззвучный режим.</p>
     </div>
   </header>
 
@@ -326,41 +306,25 @@
     <div class="scene-top">
       <div>
         <h2 id="scene-title">Как это звучит в игре</h2>
-        <p>12 секунд партии: улов, комбо, три удара Бека, конец и новый рекорд. Играют варианты, выбранные ниже.</p>
+        <p>12 секунд игры подряд: ловим десерты, собираем комбо, получаем от Бека, проигрываем и ставим рекорд. Звучат варианты, выбранные ниже.</p>
       </div>
       <button class="btn-big" id="scene-play" type="button"></button>
     </div>
     <div class="tl-scroll">
       <div class="tl">
-        <div class="lanes"><span>действие</span><span>итог</span></div>
         <div class="track"><div class="track-in" id="track-in"><div class="playhead" id="playhead"></div></div></div>
-        <div></div>
         <div class="ticks" id="ticks"></div>
       </div>
     </div>
-    <p class="now" id="scene-now" aria-live="polite">Нажмите «Сыграть сценку» — события подсветятся по ходу.</p>
+    <p class="now" id="scene-now" aria-live="polite">Нажмите «Сыграть сценку» — картинки подсветятся по ходу игры.</p>
   </section>
 
-  <section aria-labelledby="core-title">
+  <section aria-labelledby="list-title">
     <div class="sec-head">
-      <h2 id="core-title">Уже есть в коде</h2>
-      <p>Для этих событий в игре уже расставлены вызовы <code>playSound</code> — осталось выбрать звук. Нажмите на вариант, чтобы услышать его.</p>
-      <p class="legend">
-        <span><i class="sw sq"></i>квадратная волна</span>
-        <span><i class="sw tri"></i>треугольная</span>
-        <span><i class="sw noise"></i>шум</span>
-        <span>рисунок звука: время идёт вправо, выше — выше нота</span>
-      </p>
+      <h2 id="list-title">Выберите звуки</h2>
+      <p>Нажмите на вариант, чтобы его послушать, — выбранный подсвечивается жёлтым. Если какой-то звук кажется лишним, выберите «Без звука».</p>
     </div>
-    <div class="list" id="list-core"></div>
-  </section>
-
-  <section aria-labelledby="extra-title">
-    <div class="sec-head">
-      <h2 id="extra-title">Можно добавить</h2>
-      <p>Новые моменты, которых в коде пока нет. Переключите на «Не нужен», если звук лишний, — он пропадёт и из сценки.</p>
-    </div>
-    <div class="list" id="list-extra"></div>
+    <div class="list" id="list"></div>
   </section>
 
   <section class="pick" aria-labelledby="pick-title">
@@ -372,8 +336,6 @@
       <span id="copy-note" aria-live="polite"></span>
     </div>
   </section>
-
-  <footer>Каждый звук — несколько нот, собранных прямо в браузере через Web Audio. Аудиофайлов нет, поэтому игра не станет тяжелее: код набора переносится в <code>js/audio.js</code>.</footer>
 </main>
 
 <script>
@@ -382,9 +344,9 @@
 
   // --- Ноты (Гц) ---------------------------------------------------------
   const N = {
-    Bb3: 233.08, C4: 261.63, E4: 329.63, F4: 349.23, Fs4: 369.99, G4: 392.0,
+    G3: 196.0, Bb3: 233.08, C4: 261.63, E4: 329.63, F4: 349.23, Fs4: 369.99, G4: 392.0,
     C5: 523.25, E5: 659.25, G5: 783.99, B5: 987.77,
-    C6: 1046.5, E6: 1318.51, G6: 1567.98, C7: 2093.0, E7: 2637.02,
+    C6: 1046.5, E6: 1318.51, G6: 1567.98, C7: 2093.0, E7: 2637.02, G7: 3135.96,
   };
   // Сегмент звука: w — волна (sq/tri/noise), t — старт, d — длина (с), f→f1 — высота,
   // v — громкость, sus — доля длины на полной громкости, vib — [частота, глубина Гц],
@@ -414,96 +376,129 @@
   };
   const PX_COLOR = { heart: 'var(--heart)', cross: 'var(--heart)', up: 'var(--gold)', star: 'var(--gold)', play: 'var(--gold)' };
 
-  // --- Набор звуков -------------------------------------------------------
+  // --- Набор звуков: моменты игры по порядку, у каждого три варианта ----------
   const SOUNDS = {
+    start: {
+      name: 'Начало игры', icon: 'play',
+      when: 'нажали «Играть» или «Играть ещё раз»',
+      why: 'Короткий сигнал, что игра началась.',
+      def: 'a',
+      variants: {
+        a: { name: 'Поехали', segs: [sq(0, 0.04, N.G5, 0.1), sq(0.045, 0.04, N.C6, 0.1), sq(0.09, 0.09, N.E6, 0.1)] },
+        b: { name: 'Клик', segs: [sq(0, 0.03, 1400, 0.1), nz(0, 0.012, 0.1, { nh: 2 })] },
+        c: { name: 'Взлёт', segs: [tri(0, 0.18, 300, 0.4, { f1: 1200 }), sq(0.12, 0.1, N.C7, 0.07)] },
+      },
+    },
     catch: {
-      group: 'core', name: 'Поймал десерт', icon: 'dessert_strawberry',
+      name: 'Поймал десерт', icon: 'dessert_strawberry',
       when: 'десерт упал в коробку',
-      why: 'Самый частый звук — должен быть коротким и не надоедать. Второй десерт в коробке звучит на терцию выше: слышно, что коробка заполняется.',
+      why: 'Звучит чаще всех, поэтому должен быть коротким и не надоедать. Второй десерт в коробке звучит чуть выше первого.',
       pair: true,
+      def: 'b',
       variants: {
         a: { name: 'Блип', segs: [sq(0, 0.05, N.B5, 0.14), sq(0.05, 0.12, N.E6, 0.14)] },
         b: { name: 'Плюх', segs: [tri(0, 0.11, 780, 0.45, { f1: 250 }), nz(0, 0.04, 0.1, { nh: 6, lp: 3000 })] },
+        c: { name: 'Чпок', segs: [tri(0, 0.06, 420, 0.5, { f1: 1500 }), nz(0, 0.015, 0.08, { nh: 2 })] },
       },
-      def: 'b',
+    },
+    boxFull: {
+      name: 'Коробка полна', icon: 'box_lives3',
+      when: 'в коробке два разных десерта',
+      why: 'Скромнее, чем комбо, — чтобы их не перепутать.',
+      def: 'a',
+      variants: {
+        a: { name: 'Тук-тук', segs: [nz(0, 0.02, 0.08, { nh: 4 }), sq(0, 0.05, N.E5, 0.11), sq(0.07, 0.08, N.C5, 0.11)] },
+        b: { name: 'Щёлк-щёлк', segs: [nz(0, 0.02, 0.15, { nh: 3 }), sq(0, 0.03, 1760, 0.07), nz(0.09, 0.02, 0.15, { nh: 3 }), sq(0.09, 0.03, 1320, 0.07)] },
+        c: { name: 'Ок', segs: [tri(0, 0.07, N.G5, 0.35), tri(0.08, 0.12, N.C6, 0.35)] },
+      },
     },
     combo: {
-      group: 'core', name: 'Комбо', icon: 'dessert_cake',
+      name: 'Комбо', icon: 'dessert_cake',
       when: 'два одинаковых десерта в коробке',
-      why: 'Награда — самый яркий звук набора, чтобы за комбо хотелось охотиться.',
+      why: 'Награда — самый яркий звук, чтобы за комбо хотелось охотиться.',
+      def: 'a',
       variants: {
         a: { name: 'Арпеджио', segs: [sq(0, 0.06, N.C6, 0.12), sq(0.06, 0.06, N.E6, 0.12), sq(0.12, 0.06, N.G6, 0.12),
           sq(0.18, 0.26, N.C7, 0.12, { sus: 0.4 }), tri(0.18, 0.26, N.C5, 0.35, { sus: 0.4 })] },
         b: { name: 'Звёздочка', segs: [tri(0, 0.16, 520, 0.35, { f1: 2090 })].concat(trill) },
+        c: { name: 'Колокольчики', segs: [tri(0, 0.4, N.C7, 0.35), tri(0.08, 0.4, N.E7, 0.3), tri(0.16, 0.5, N.G7, 0.25)] },
       },
-      def: 'a',
+    },
+    bekAppear: {
+      name: 'Появился Бек', icon: 'bek_head',
+      when: 'голова Бека вылетает сверху',
+      why: 'Подсказывает, что пора уворачиваться. Бек появляется часто — если звук надоедает, выберите «Без звука».',
+      def: 'none',
+      variants: {
+        a: { name: 'Уи-у', segs: [tri(0, 0.12, 480, 0.2, { f1: 900 }), tri(0.12, 0.15, 900, 0.2, { f1: 420 })] },
+        b: { name: 'Вжух', segs: [nz(0, 0.25, 0.22, { nh: 2, lp: 2500, sus: 0.3 }), tri(0, 0.25, 200, 0.15, { f1: 520 })] },
+        c: { name: 'Хихиканье', segs: [sq(0, 0.08, 1200, 0.06, { vib: [30, 80] }), sq(0.11, 0.08, 1300, 0.06, { vib: [30, 80] })] },
+      },
     },
     hit: {
-      group: 'core', name: 'Бек попал в коробку', icon: 'box_lives1',
+      name: 'Бек попал в коробку', icon: 'box_lives1',
       when: 'минус одна жизнь',
-      why: 'Должен ощущаться как ошибка, но без злости — игра смешная.',
+      why: 'Ощущается как ошибка, но без злости — игра смешная.',
+      def: 'a',
       variants: {
         a: { name: 'Бум', segs: [nz(0, 0.3, 0.45, { nh: 48, lp: 1800 }), sq(0, 0.24, 220, 0.18, { f1: 45 })] },
         b: { name: 'Хрусь', segs: [nz(0, 0.13, 0.38, { nh: 14 }), sq(0.02, 0.08, N.E4, 0.13), sq(0.11, 0.16, N.Bb3, 0.13)] },
+        c: { name: 'Падение', segs: [sq(0, 0.3, 600, 0.14, { f1: 80 }), nz(0, 0.06, 0.3, { nh: 20 })] },
       },
+    },
+    lastLife: {
+      name: 'Последняя жизнь', icon: 'heart',
+      when: 'осталось одно сердечко',
+      why: 'Звучит один раз — предупреждает, что осталась последняя попытка.',
       def: 'a',
+      variants: {
+        a: { name: 'Сердцебиение', segs: [tri(0, 0.12, 190, 0.55, { f1: 70 }), nz(0, 0.025, 0.12, { nh: 30 }),
+          tri(0.2, 0.14, 170, 0.5, { f1: 60 }), nz(0.2, 0.025, 0.1, { nh: 30 })] },
+        b: { name: 'Тревога', segs: [sq(0, 0.12, 880, 0.09), sq(0.13, 0.12, 660, 0.09), sq(0.26, 0.12, 880, 0.09), sq(0.39, 0.12, 660, 0.09)] },
+        c: { name: 'Тик-так', segs: [nz(0, 0.02, 0.2, { nh: 3 }), tri(0, 0.04, 1800, 0.2), nz(0.25, 0.02, 0.2, { nh: 3 }), tri(0.25, 0.04, 1400, 0.2)] },
+      },
+    },
+    speedUp: {
+      name: 'Ускорение', icon: 'up',
+      when: 'каждые 100 очков',
+      why: 'Десерты начинают падать быстрее — звук объясняет, почему стало труднее.',
+      def: 'a',
+      variants: {
+        a: { name: 'Динь-динь', segs: [sq(0, 0.05, N.C7, 0.09), sq(0.09, 0.09, N.C7, 0.09)] },
+        b: { name: 'Разгон', segs: [sq(0, 0.25, 300, 0.09, { f1: 1500 })] },
+        c: { name: 'Бип-бип', segs: [sq(0, 0.05, N.C6, 0.09), sq(0.06, 0.05, N.C7, 0.09), sq(0.12, 0.05, N.C6, 0.09), sq(0.18, 0.08, N.C7, 0.09)] },
+      },
     },
     gameover: {
-      group: 'core', name: 'Конец игры', icon: 'cross',
+      name: 'Конец игры', icon: 'cross',
       when: 'закончились жизни',
-      why: 'Грустно, но с улыбкой — чтобы хотелось нажать «Играть ещё раз».',
+      why: 'Грустно, но с улыбкой — чтобы хотелось сыграть ещё раз.',
+      def: 'b',
       variants: {
         a: { name: 'Ноты вниз', segs: [sq(0, 0.16, N.G5, 0.11), sq(0.19, 0.16, N.E5, 0.11), sq(0.38, 0.16, N.C5, 0.11),
           sq(0.6, 0.7, N.G4, 0.11, { f1: 370, sus: 0.35, vib: [6, 7] }),
-          tri(0, 0.55, N.C4, 0.3), tri(0.6, 0.7, 196, 0.3, { sus: 0.35 })] },
+          tri(0, 0.55, N.C4, 0.3), tri(0.6, 0.7, N.G3, 0.3, { sus: 0.35 })] },
         b: { name: 'Сдувается', segs: [sq(0, 0.2, N.G4, 0.12, { vib: [7, 4] }), sq(0.25, 0.2, N.Fs4, 0.12, { vib: [7, 4] }),
           sq(0.5, 0.2, N.F4, 0.12, { vib: [7, 4] }), sq(0.75, 0.8, N.E4, 0.12, { f1: 300, sus: 0.45, vib: [6, 9] }),
           tri(0.75, 0.8, 164.8, 0.3, { f1: 150, sus: 0.45 })] },
+        c: { name: 'Выключение', segs: [nz(0, 0.25, 0.3, { nh: 60, lp: 1500 }), sq(0.05, 0.9, 300, 0.12, { f1: 60, sus: 0.2 }),
+          tri(0.05, 0.9, 150, 0.3, { f1: 40, sus: 0.2 })] },
       },
-      def: 'b',
-    },
-    boxFull: {
-      group: 'extra', name: 'Коробка полна, без комбо', short: 'коробка полна', icon: 'box_lives3',
-      when: 'в коробке два разных десерта',
-      why: 'Короткое «тук-тук» отличает обычную полную коробку от комбо.',
-      segs: [nz(0, 0.02, 0.08, { nh: 4 }), sq(0, 0.05, N.E5, 0.11), sq(0.07, 0.08, N.C5, 0.11)],
-      def: true,
-    },
-    bekAppear: {
-      group: 'extra', name: 'Появился Бек', short: 'появился Бек', icon: 'bek_head',
-      when: 'голова Бека вылетает сверху',
-      why: 'Помогает вовремя увернуться. Но Бек появляется каждые 3–5 секунд — послушайте сценку и решите, не надоест ли.',
-      segs: [tri(0, 0.12, 480, 0.2, { f1: 900 }), tri(0.12, 0.15, 900, 0.2, { f1: 420 })],
-      def: false,
-    },
-    lastLife: {
-      group: 'extra', name: 'Последняя жизнь', short: 'последняя жизнь', icon: 'heart',
-      when: 'осталось одно сердечко',
-      why: 'Звучит один раз, как предупреждение. Динамик телефона плохо играет басы, поэтому у удара есть «щелчок» — так его слышно.',
-      segs: [tri(0, 0.12, 190, 0.55, { f1: 70 }), nz(0, 0.025, 0.12, { nh: 30 }), tri(0.2, 0.14, 170, 0.5, { f1: 60 }), nz(0.2, 0.025, 0.1, { nh: 30 })],
-      def: true,
-    },
-    speedUp: {
-      group: 'extra', name: 'Ускорение', short: 'ускорение', icon: 'up',
-      when: 'каждые 100 очков игра становится быстрее',
-      why: 'Игрок понимает, почему вдруг стало труднее.',
-      segs: [sq(0, 0.05, N.C7, 0.09), sq(0.09, 0.09, N.C7, 0.09)],
-      def: true,
     },
     record: {
-      group: 'extra', name: 'Новый рекорд', short: 'новый рекорд', icon: 'star',
-      when: 'на экране конца игры',
-      why: 'Праздник поверх грустного звука конца — повод похвастаться результатом.',
-      segs: [sq(0, 0.08, N.C5, 0.11), sq(0.09, 0.08, N.E5, 0.11), sq(0.18, 0.08, N.G5, 0.11),
-        sq(0.28, 0.5, N.C6, 0.11, { sus: 0.5, vib: [5, 6] }), sq(0.28, 0.5, N.E6, 0.06, { sus: 0.5 }), tri(0.28, 0.5, N.C4, 0.32, { sus: 0.5 })],
-      def: true,
-    },
-    start: {
-      group: 'extra', name: 'Кнопка «Играть»', short: 'кнопка «Играть»', icon: 'play',
-      when: 'старт и «Играть ещё раз»',
-      why: 'Заодно включает звук на iPhone: браузер разрешает звук только после нажатия.',
-      segs: [sq(0, 0.04, N.G5, 0.1), sq(0.045, 0.04, N.C6, 0.1), sq(0.09, 0.09, N.E6, 0.1)],
-      def: true,
+      name: 'Новый рекорд', icon: 'star',
+      when: 'игрок побил свой лучший результат',
+      why: 'Праздник поверх грустного звука конца — повод похвастаться.',
+      def: 'a',
+      variants: {
+        a: { name: 'Фанфары', segs: [sq(0, 0.08, N.C5, 0.11), sq(0.09, 0.08, N.E5, 0.11), sq(0.18, 0.08, N.G5, 0.11),
+          sq(0.28, 0.5, N.C6, 0.11, { sus: 0.5, vib: [5, 6] }), sq(0.28, 0.5, N.E6, 0.06, { sus: 0.5 }), tri(0.28, 0.5, N.C4, 0.32, { sus: 0.5 })] },
+        b: { name: 'Салют', segs: [tri(0, 0.3, 300, 0.35, { f1: 1800 }), nz(0.3, 0.15, 0.3, { nh: 8 }),
+          sq(0.32, 0.1, N.C7, 0.08), sq(0.42, 0.1, N.G6, 0.08), sq(0.52, 0.2, N.C7, 0.08, { sus: 0.4 })] },
+        c: { name: 'Мелодия победы', segs: [sq(0, 0.1, N.G5, 0.1), sq(0.1, 0.1, N.C6, 0.1), sq(0.2, 0.1, N.E6, 0.1),
+          sq(0.3, 0.15, N.G6, 0.1), sq(0.47, 0.1, N.E6, 0.1), sq(0.58, 0.4, N.G6, 0.1, { sus: 0.5 }),
+          tri(0, 0.5, N.C4, 0.3), tri(0.58, 0.4, N.G3, 0.3, { sus: 0.5 })] },
+      },
     },
   };
 
@@ -528,30 +523,28 @@
     { t: 10.9, id: 'record',    lane: 1, label: 'Новый рекорд!' },
   ];
 
-  // --- Состояние выбора (запоминается в этом браузере) -----------------------
-  const KEY = 'desserty-8bit-picks';
-  const pick = {}, use = {};
-  for (const [id, s] of Object.entries(SOUNDS)) (s.variants ? pick : use)[id] = s.def;
+  // --- Выбор (запоминается в этом браузере) -------------------------------------
+  const KEY = 'desserty-8bit-v2';
+  const pick = {};
+  for (const [id, s] of Object.entries(SOUNDS)) pick[id] = s.def;
   let vol = 60;
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
-    Object.assign(pick, saved.pick || {});
-    Object.assign(use, saved.use || {});
+    for (const [id, v] of Object.entries(saved.pick || {})) {
+      if (SOUNDS[id] && (v === 'none' || SOUNDS[id].variants[v])) pick[id] = v;
+    }
     if (typeof saved.vol === 'number') vol = saved.vol;
   } catch (e) { /* без хранилища — просто значения по умолчанию */ }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify({ pick, use, vol })); } catch (e) {}
+    try { localStorage.setItem(KEY, JSON.stringify({ pick, vol })); } catch (e) {}
   }
 
-  const segsOf = (id) => {
-    const s = SOUNDS[id];
-    return s.variants ? s.variants[pick[id]].segs : s.segs;
-  };
-  const enabled = (id) => SOUNDS[id].group === 'core' || use[id];
-  const durOf = (segs) => Math.max(...segs.map((s) => s.t + s.d));
+  const enabled = (id) => pick[id] !== 'none';
+  const segsOf = (id) => enabled(id) ? SOUNDS[id].variants[pick[id]].segs : [];
+  const durOf = (segs) => segs.length ? Math.max(...segs.map((s) => s.t + s.d)) : 0;
   const fmtSec = (t) => t.toFixed(2).replace(/0$/, '').replace('.', ',') + ' с';
 
-  // --- Синтез (Web Audio) ---------------------------------------------------
+  // --- Синтез ----------------------------------------------------------------------
   let ac = null, master = null;
   const noiseCache = {};
   const WAVE = { sq: 'square', tri: 'triangle' };
@@ -665,9 +658,9 @@
       const k = Math.log(f / F_MIN) / Math.log(F_MAX / F_MIN);
       return Math.max(0, Math.min(tonal, Math.round((1 - k) * tonal)));
     };
-    // октавы до 4–7 — тонкие направляющие
     c.fillStyle = 'rgba(185, 164, 240, 0.14)';
     for (const f of [N.C4, N.C5, N.C6, N.C7]) c.fillRect(0, rowOf(f) * CELL + CELL / 2, w, 1);
+    if (!segs.length) return;
     const dur = durOf(segs);
     for (const s of segs) {
       const x0 = Math.floor(s.t / dur * (cols - 1));
@@ -695,11 +688,13 @@
   function redrawRoll(id) {
     rolls[id].tok = null;
     drawRoll(rolls[id].cv, segsOf(id), null);
-    document.getElementById('dur-' + id).textContent = fmtSec(durOf(segsOf(id)));
+    document.getElementById('dur-' + id).textContent = enabled(id) ? fmtSec(durOf(segsOf(id))) : 'без звука';
+    document.getElementById('play-' + id).disabled = !enabled(id);
   }
   function playOne(id, mult, delay) {
-    const a = audio();
     const segs = segsOf(id);
+    if (!segs.length) return;
+    const a = audio();
     const at = a.currentTime + 0.03 + (delay || 0);
     schedule(segs, at, mult);
     const roll = rolls[id], tok = {}, dur = durOf(segs);
@@ -715,32 +710,28 @@
   }
 
   // --- Строки звуков -------------------------------------------------------------
+  function chip(id, value, label, extraClass) {
+    return '<label class="chip' + (extraClass || '') + '"><input type="radio" name="' + id + '" id="' + id + '-' + value +
+      '" value="' + value + '"' + (pick[id] === value ? ' checked' : '') + '><span>' + label + '</span></label>';
+  }
   function rowHTML(id, s) {
-    let controls;
-    if (s.variants) {
-      controls = Object.entries(s.variants).map(([v, variant]) =>
-        '<label class="chip"><input type="radio" name="' + id + '" id="' + id + '-' + v + '" value="' + v + '"' +
-        (pick[id] === v ? ' checked' : '') + '><span>' + variant.name + '</span></label>').join('');
-      if (s.pair) controls += '<button class="btn-pair" type="button" data-pair="' + id + '">Послушать пару</button>';
-    } else {
-      controls = '<label class="chip"><input type="checkbox" id="use-' + id + '"' + (use[id] ? ' checked' : '') +
-        '><span>' + (use[id] ? 'Берём в игру' : 'Не нужен') + '</span></label>';
-    }
-    return '<article class="snd' + (s.variants || use[id] ? '' : ' unused') + '" id="snd-' + id + '">' +
+    let controls = Object.entries(s.variants).map(([v, variant]) => chip(id, v, variant.name)).join('') +
+      chip(id, 'none', 'Без звука', ' chip-none');
+    if (s.pair) controls += '<button class="btn-pair" type="button" data-pair="' + id + '">Послушать два подряд</button>';
+    return '<article class="snd' + (enabled(id) ? '' : ' unused') + '" id="snd-' + id + '">' +
       '<div class="ico">' + iconHTML(s.icon) + '</div>' +
       '<div class="txt"><h3>' + s.name + '</h3>' +
       '<p class="when">Когда · ' + s.when + '</p>' +
       '<p class="why">' + s.why + '</p>' +
-      '<fieldset class="chips"><legend class="sr">' + (s.variants ? 'Вариант звука' : 'Нужен ли звук') + '</legend>' + controls + '</fieldset></div>' +
+      '<fieldset class="chips"><legend class="sr">Вариант звука</legend>' + controls + '</fieldset></div>' +
       '<div class="roll"><canvas id="roll-' + id + '" aria-hidden="true"></canvas><span class="dur" id="dur-' + id + '"></span></div>' +
-      '<button class="btn-play" type="button" data-play="' + id + '" aria-label="Прослушать: ' + s.name + '">' +
+      '<button class="btn-play" type="button" id="play-' + id + '" data-play="' + id + '" aria-label="Послушать: ' + s.name + '">' +
       pixelSvg(PX.play, 'var(--night)') + '</button></article>';
   }
 
-  const listCore = document.getElementById('list-core');
-  const listExtra = document.getElementById('list-extra');
+  const list = document.getElementById('list');
   for (const [id, s] of Object.entries(SOUNDS)) {
-    (s.group === 'core' ? listCore : listExtra).insertAdjacentHTML('beforeend', rowHTML(id, s));
+    list.insertAdjacentHTML('beforeend', rowHTML(id, s));
     rolls[id] = { cv: document.getElementById('roll-' + id), tok: null };
   }
 
@@ -752,17 +743,11 @@
   });
   document.querySelector('.wrap').addEventListener('change', (e) => {
     const el = e.target;
-    if (el.type === 'radio' && SOUNDS[el.name]) {
-      pick[el.name] = el.value;
-      redrawRoll(el.name);
-      playOne(el.name, 1);
-    } else if (el.type === 'checkbox' && el.id.startsWith('use-')) {
-      const id = el.id.slice(4);
-      use[id] = el.checked;
-      el.nextElementSibling.textContent = el.checked ? 'Берём в игру' : 'Не нужен';
-      document.getElementById('snd-' + id).classList.toggle('unused', !el.checked);
-      if (el.checked) playOne(id, 1);
-    } else return;
+    if (el.type !== 'radio' || !SOUNDS[el.name]) return;
+    pick[el.name] = el.value;
+    document.getElementById('snd-' + el.name).classList.toggle('unused', !enabled(el.name));
+    redrawRoll(el.name);
+    playOne(el.name, 1);
     save();
     syncScene();
     renderSummary();
@@ -825,7 +810,7 @@
         if (!ev.fired && el >= ev.t) {
           ev.fired = true;
           markers[i].classList.add('fired');
-          nowEl.textContent = fmtSec(ev.t) + ' · ' + ev.label + (enabled(ev.id) ? '' : ' (звук выключен)');
+          nowEl.textContent = fmtSec(ev.t) + ' · ' + ev.label + (enabled(ev.id) ? '' : ' (без звука)');
         }
       });
       if (el >= SCENE_TOTAL) { stopScene(true); return; }
@@ -845,15 +830,8 @@
   // --- Итоговая строка ---------------------------------------------------------------
   const summary = document.getElementById('summary');
   function renderSummary() {
-    const parts = [], add = [], skip = [];
-    for (const [id, s] of Object.entries(SOUNDS)) {
-      if (s.variants) parts.push(s.name + ' — ' + s.variants[pick[id]].name);
-      else (use[id] ? add : skip).push(s.short);
-    }
-    let text = parts.join('; ');
-    if (add.length) text += '. Добавить: ' + add.join(', ');
-    if (skip.length) text += '. Не нужно: ' + skip.join(', ');
-    summary.textContent = text + '.';
+    summary.textContent = Object.entries(SOUNDS).map(([id, s]) =>
+      s.name + ' — ' + (enabled(id) ? s.variants[pick[id]].name : 'без звука')).join('; ') + '.';
   }
   renderSummary();
 
@@ -868,7 +846,7 @@
       const sel = window.getSelection();
       sel.removeAllRanges();
       sel.addRange(r);
-      copyNote.textContent = 'Строка выделена — скопируйте её (⌘C или «Скопировать» в меню)';
+      copyNote.textContent = 'Строка выделена — скопируйте её через меню';
     }
   });
 
